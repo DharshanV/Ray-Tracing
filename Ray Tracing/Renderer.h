@@ -5,10 +5,19 @@
 #include <vector>
 #include <algorithm> 
 #include <limits>
+#include <time.h>
+#include <string>
 #include "Vector3f.h"
 #include "Debug.h"
 
 using namespace std;
+
+struct Timer
+{
+	clock_t start;
+	clock_t stop;
+};
+
 class Renderer {
 public:
 	Renderer(float width, float height) : width(width), height(height) {
@@ -19,6 +28,7 @@ public:
 public:
 	bool start() {
 		rendererStarted = true;
+		timer.start = clock();
 		DEBUG("PUTTING IN BUFFER");
 		for (int x = 0; x < height; x++) {
 			for (int y = 0; y < width; y++) {
@@ -28,6 +38,7 @@ public:
 		DEBUG("BUFFER FILLED");
 		return true;
 	}
+
 	bool ouput(const char* fileName) {
 		if (!rendererStarted) { DEBUG("RENDER NOT STARTED");  return false; }
 		DEBUG("OUTPUT STARTED");
@@ -41,6 +52,8 @@ public:
 		}
 		out.close();
 		DEBUG("OUTPUT FINISHED");
+		timer.stop = clock();
+		DEBUG("ELAPSED TIME: " + to_string(ceil((timer.stop - timer.start)/1000)) + "s");
 		return true;
 	}
 private:
@@ -48,6 +61,7 @@ private:
 		return x * height + y;
 	}
 private:
+	Timer timer;
 	bool rendererStarted;
 	float width, height;
 	vector<Vector3f> buffer;
