@@ -12,28 +12,28 @@ public:
 	void print(ostream& out) const { out << "[" << x << "," << y << "," << z<<"]"; }
 	virtual ~Vector3f() { }
 public:
-	float normalize() {
+	inline float normalize() {
 		float L = this->length();
 		*this /= L;
 		return L;
 	}
 
-	Vector3f getNormalized() {
+	inline Vector3f getNormalized() {
 		Vector3f temp(*this);
 		temp /= temp.length();
 		temp = -*this;
 		return temp;
 	}
 
-	float length() {
+	inline float length() {
 		return this->sqrt(sqr(x) + sqr(y) + sqr(z));
 	}
 
-	float dot(const Vector3f& v) {
+	inline float dot(const Vector3f& v) {
 		return x * v.x + y * v.y + z * v.z;
 	}
 
-	Vector3f cross(const Vector3f& v) {
+	inline Vector3f cross(const Vector3f& v) {
 		Vector3f temp;
 		temp.x = y * v.z - (v.y* z);
 		temp.y = -(x*v.z - (v.x * z));
@@ -42,47 +42,47 @@ public:
 	}
 
 public:
-	Vector3f& operator = (const Vector3f& v) {
+	inline Vector3f& operator = (const Vector3f& v) {
 		x = v.x;
 		y = v.y;
 		z = v.z;
 	}
 
-	Vector3f& operator += (const Vector3f& v) {
+	inline Vector3f& operator += (const Vector3f& v) {
 		x += v.x;
 		y += v.y;
 		z += v.z;
 	}
 
-	Vector3f& operator -= (const Vector3f& v) {
+	inline Vector3f& operator -= (const Vector3f& v) {
 		x -= v.x;
 		y -= v.y;
 		z -= v.z;
 	}
 
-	Vector3f& operator /= (float value) {
+	inline Vector3f& operator /= (float value) {
 		x /= value;
 		y /= value;
 		z /= value;
 	}
 
-	Vector3f& operator *= (float value) {
+	inline Vector3f& operator *= (float value) {
 		x *= value;
 		y *= value;
 		z *= value;
 	}
 
-	Vector3f operator - () {
+	inline Vector3f operator - () {
 		Vector3f temp(*this);
 		temp *= -1;
 		return temp;
 	}
 private:
-	float sqr(float value) {
+	inline float sqr(float value) {
 		return value * value;
 	}
 
-	float sqrt(float value) {
+	inline float sqrt(float value) {
 		return sqrtf(value);
 	}
 
