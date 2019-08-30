@@ -23,5 +23,11 @@
     <ClInclude Include="Vector3f.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

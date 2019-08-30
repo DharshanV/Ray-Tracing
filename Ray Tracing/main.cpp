@@ -1,12 +1,10 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include "Vector3f.h"
-using namespace std;
+#include "Renderer.h"
 
 int main() {
 	float width = 100;
 	float height = 100;
-	vector<Vector3f> buffer(width*height);
+	Renderer renderer(width, height);
+	renderer.start();
+	renderer.ouput("Rendered Image.ppm");
 	return 0;
 }
