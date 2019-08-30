@@ -1,7 +1,8 @@
 #ifndef VECTOR3F_H
 #define VECTOR3F_H
 #include <iostream>
-#include <math.h>
+#include <cmath>
+#include <assert.h>
 using namespace std;
 class Vector3f {
 public:
@@ -46,30 +47,42 @@ public:
 		x = v.x;
 		y = v.y;
 		z = v.z;
+		return *this;
 	}
 
 	inline Vector3f& operator += (const Vector3f& v) {
 		x += v.x;
 		y += v.y;
 		z += v.z;
+		return *this;
 	}
 
 	inline Vector3f& operator -= (const Vector3f& v) {
 		x -= v.x;
 		y -= v.y;
 		z -= v.z;
+		return *this;
 	}
 
 	inline Vector3f& operator /= (float value) {
 		x /= value;
 		y /= value;
 		z /= value;
+		return *this;
 	}
 
 	inline Vector3f& operator *= (float value) {
 		x *= value;
 		y *= value;
 		z *= value;
+		return *this;
+	}
+
+	inline float operator [] (int index) {
+		if (index == 0) return x;
+		if (index == 1) return y;
+		if (index == 2) return z;
+		assert(!true, "invalid index");
 	}
 
 	inline Vector3f operator - () {
@@ -105,11 +118,13 @@ inline Vector3f operator - (const Vector3f& a, const Vector3f& b) {
 inline Vector3f operator * (const Vector3f& a, float value) {
 	Vector3f temp(a);
 	temp *= value;
+	return temp;
 }
 
 inline Vector3f operator / (const Vector3f& a, float value) {
 	Vector3f temp(a);
 	temp /= value;
+	return temp;
 }
 
 ostream& operator << (ostream& out, const Vector3f& a) {
