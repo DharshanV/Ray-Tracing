@@ -9,28 +9,18 @@
 #include <string>
 #include "Vector3f.h"
 #include "Debug.h"
-#include "Sphere.h"
-using namespace std;
+#include "Model.h"
 
-struct Timer
-{
-	clock_t start;
-	clock_t stop;
-};
+using namespace std;
 
 class Renderer {
 public:
-	Renderer(float width, float height) : width(width), height(height) {
+	Renderer(float width, float height,Vector3f eye = Vector3f(0),float fov = 45.0f) : 
+		width(width), height(height), rayOrigin(eye),fov(fov) {
 		rendererStarted = false;
 		buffer.resize(width*height);
-		rayOrigin = Vector3f(0);
 	}
-	Renderer(float width, float height,Vector3f eye) : width(width), height(height) {
-		rendererStarted = false;
-		buffer.resize(width*height);
-		rayOrigin = eye;
-	}
-	~Renderer() { }
+	~Renderer() { clearObjects(); }
 public:
 	bool start() {
 		rendererStarted = true;
@@ -48,18 +38,18 @@ public:
 		return true;
 	}
 
-	Vector3f castRay(const Vector3f& origin, const Vector3f& dir,const vector<Sphere>& objects) {
+	Vector3f castRay(const Vector3f& origin, const Vector3f& dir,const vector<const Model*>& objects) {
 		if (sceneIntersect(origin,dir, objects)) {
 			return Vector3f(0.2, 0.7, 0.8);
 		}
 		return Vector3f(0.2f, 0.3f, 0.3f);
 	}
 
-	bool sceneIntersect(const Vector3f& origin, const Vector3f& dir, const vector<Sphere>& objects) {
+	bool sceneIntersect(const Vector3f& origin, const Vector3f& dir, const vector<const Model*>& objects) {
 		float maxDistance = numeric_limits<float>::max();
-		for (const Sphere& s : objects) {
+		for (const Model* o : objects) {
 			float distanceI;
-			if (s.rayIntersect(origin, dir, distanceI) && distanceI < maxDistance) {
+			if (o->rayIntersect(origin, dir, distanceI) && distanceI < maxDistance) {
 				maxDistance = distanceI;
 			}
 		}
@@ -84,21 +74,32 @@ public:
 		return true;
 	}
 public:
-	void addObject(const Sphere& s) {
+	void addObject(const Model* s) {
 		objects.push_back(s);
 	}
 private:
 	int index(int x, int y) {
 		return x * height + y;
 	}
+
+	void clearObjects() {
+		DEBUG("DELETING OBJECTS");
+		for (const Model* o : objects) {
+			if (o != NULL) { delete o; o = NULL; }
+		}
+		DEBUG("CLEARED OBJECTS");
+	}
 private:
+	struct Timer { clock_t start, stop; };
 	Timer timer;
+private:
+	vector<Vector3f> buffer;
+	vector<const Model*> objects;
+	Vector3f rayOrigin;
+private:
+	float fov;
 	bool rendererStarted;
 	float width, height;
-	float fov = 45.0f;
-	vector<Vector3f> buffer;
-	vector<Sphere> objects;
-	Vector3f rayOrigin;
 };
 
 #endif // !RENDERER_H
