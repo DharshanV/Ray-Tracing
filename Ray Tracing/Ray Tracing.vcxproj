@@ -123,7 +123,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Debug.h" />
-    <ClInclude Include="Object.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Vector3f.h" />
