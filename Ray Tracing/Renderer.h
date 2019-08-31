@@ -41,21 +41,29 @@ public:
 				float dirX = (2 * (y + 0.5) / (float)width - 1)*tan(fov / 2.)*width / (float)height;
 				float dirY = -(2 * (x + 0.5) / (float)height - 1)*tan(fov / 2.);
 				Vector3f dir = Vector3f(dirX, dirY, -1).getNormalized();
-				for (Sphere& sphere : objects) {
-					buffer[index(x,y)] = castRay(rayOrigin,dir,sphere);
-				}
+				buffer[index(x, y)] = castRay(rayOrigin, dir, objects);
 			}
 		}
 		DEBUG("BUFFER FILLED");
 		return true;
 	}
 
-	Vector3f castRay(const Vector3f& origin, const Vector3f& dir,const Sphere& sphere) {
-		float sphere_dist = std::numeric_limits<float>::max();
-		if (sphere.rayIntersect(origin, dir, sphere_dist)) {
+	Vector3f castRay(const Vector3f& origin, const Vector3f& dir,const vector<Sphere>& objects) {
+		if (sceneIntersect(origin,dir, objects)) {
 			return Vector3f(0.2, 0.7, 0.8);
 		}
 		return Vector3f(0.2f, 0.3f, 0.3f);
+	}
+
+	bool sceneIntersect(const Vector3f& origin, const Vector3f& dir, const vector<Sphere>& objects) {
+		float maxDistance = numeric_limits<float>::max();
+		for (const Sphere& s : objects) {
+			float distanceI;
+			if (s.rayIntersect(origin, dir, distanceI) && distanceI < maxDistance) {
+				maxDistance = distanceI;
+			}
+		}
+		return (maxDistance < 1000);
 	}
 
 	bool output(const char* fileName) {
