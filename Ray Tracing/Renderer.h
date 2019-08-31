@@ -9,7 +9,7 @@
 #include <string>
 #include "Vector3f.h"
 #include "Debug.h"
-
+#include "Sphere.h"
 using namespace std;
 
 struct Timer
@@ -23,6 +23,12 @@ public:
 	Renderer(float width, float height) : width(width), height(height) {
 		rendererStarted = false;
 		buffer.resize(width*height);
+		rayOrigin = Vector3f(0);
+	}
+	Renderer(float width, float height,Vector3f eye) : width(width), height(height) {
+		rendererStarted = false;
+		buffer.resize(width*height);
+		rayOrigin = eye;
 	}
 	~Renderer() { }
 public:
@@ -30,16 +36,29 @@ public:
 		rendererStarted = true;
 		timer.start = clock();
 		DEBUG("PUTTING IN BUFFER");
-		for (int x = 0; x < height; x++) {
-			for (int y = 0; y < width; y++) {
-				buffer[y+x*width] = Vector3f(x/height, y/(float)width, 0);
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				float dirX = (2 * (y + 0.5) / (float)width - 1)*tan(fov / 2.)*width / (float)height;
+				float dirY = -(2 * (x + 0.5) / (float)height - 1)*tan(fov / 2.);
+				Vector3f dir = Vector3f(dirX, dirY, -1).getNormalized();
+				for (Sphere& sphere : objects) {
+					buffer[index(x,y)] = castRay(rayOrigin,dir,sphere);
+				}
 			}
 		}
 		DEBUG("BUFFER FILLED");
 		return true;
 	}
 
-	bool ouput(const char* fileName) {
+	Vector3f castRay(const Vector3f& origin, const Vector3f& dir,const Sphere& sphere) {
+		float sphere_dist = std::numeric_limits<float>::max();
+		if (sphere.rayIntersect(origin, dir, sphere_dist)) {
+			return Vector3f(0.2, 0.7, 0.8);
+		}
+		return Vector3f(0.2f, 0.3f, 0.3f);
+	}
+
+	bool output(const char* fileName) {
 		if (!rendererStarted) { DEBUG("RENDER NOT STARTED");  return false; }
 		DEBUG("OUTPUT STARTED");
 		ofstream out;
@@ -53,8 +72,12 @@ public:
 		out.close();
 		DEBUG("OUTPUT FINISHED");
 		timer.stop = clock();
-		DEBUG("ELAPSED TIME: " + to_string(ceil((timer.stop - timer.start)/1000)) + "s");
+		DEBUG("ELAPSED TIME: " + to_string(timer.stop - timer.start) + "ms");
 		return true;
+	}
+public:
+	void addObject(const Sphere& s) {
+		objects.push_back(s);
 	}
 private:
 	int index(int x, int y) {
@@ -64,7 +87,10 @@ private:
 	Timer timer;
 	bool rendererStarted;
 	float width, height;
+	float fov = 45.0f;
 	vector<Vector3f> buffer;
+	vector<Sphere> objects;
+	Vector3f rayOrigin;
 };
 
 #endif // !RENDERER_H

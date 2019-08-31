@@ -22,7 +22,6 @@ public:
 	inline Vector3f getNormalized() {
 		Vector3f temp(*this);
 		temp /= temp.length();
-		temp = -*this;
 		return temp;
 	}
 
@@ -30,11 +29,11 @@ public:
 		return this->sqrt(sqr(x) + sqr(y) + sqr(z));
 	}
 
-	inline float dot(const Vector3f& v) {
+	inline float dot(const Vector3f& v) const {
 		return x * v.x + y * v.y + z * v.z;
 	}
 
-	inline Vector3f cross(const Vector3f& v) {
+	inline Vector3f cross(const Vector3f& v) const {
 		Vector3f temp;
 		temp.x = y * v.z - (v.y* z);
 		temp.y = -(x*v.z - (v.x * z));
