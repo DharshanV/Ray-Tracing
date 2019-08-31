@@ -5,7 +5,8 @@ class Sphere : public Model {
 public:
 	Sphere() : position(0), radius(1) {}
 	Sphere(Vector3f position) : position(position), radius(1) {}
-	Sphere(Vector3f position,float r) : position(position), radius(r) {}
+	Sphere(Vector3f position,float r,Material mat) :
+			position(position), radius(r), material(mat) {}
 	~Sphere() {}
 public:
 	bool rayIntersect(const Vector3f& origin, const Vector3f& dir,float& t) const {
@@ -23,7 +24,14 @@ public:
 		if (t < 0) return false;
 		return true;
 	}
+
+	const Material* getMaterial() const { return &material; }
+
+	Vector3f getNormal(const Vector3f& hit) const {
+		return hit - position;
+	}
 private:
+	Material material;
 	Vector3f position;
 	float radius;
 };

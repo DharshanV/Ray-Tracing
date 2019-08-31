@@ -6,9 +6,9 @@ int main() {
 	const char* fileName = "Rendered-Image.ppm";
 	Renderer renderer(width, height,Vector3f(0,0,3));
 
-	renderer.addObject(new Sphere(Vector3f(-2, 0, -3), 1));
-	renderer.addObject(new Sphere(Vector3f(2, 0, -5), 1));
-	renderer.addObject(new Sphere(Vector3f(0, -3, -10), 1));
+	renderer.addModel(new Sphere(Vector3f(-2, 0, -3), 1, Material(0.4f,0.4f,0.3f)));
+	renderer.addModel(new Sphere(Vector3f(2, 0, -5), 1, Material(0.3f, 0.2f, 0.6f)));
+	renderer.addModel(new Sphere(Vector3f(0, -3, -10), 1, Material(0.6f, 0.2f, 0.3f)));
 
 	renderer.start();
 	renderer.output(fileName);

@@ -38,18 +38,24 @@ public:
 	}
 
 	Vector3f castRay(const Vector3f& origin, const Vector3f& dir,const vector<const Model*>& objects) {
-		if (sceneIntersect(origin,dir, objects)) {
-			return Vector3f(1.0f, 0.5f, 0.2f);
+		Vector3f hitPoint, N;
+		Material hitMaterial;
+		if (!sceneIntersect(origin,dir, hitPoint, N, hitMaterial, objects)) {
+			return Vector3f(0.2f, 0.3f, 0.3f);
 		}
-		return Vector3f(0.2f, 0.3f, 0.3f);
+		return hitMaterial.diffuse();
 	}
 
-	bool sceneIntersect(const Vector3f& origin, const Vector3f& dir, const vector<const Model*>& objects) {
+	bool sceneIntersect(const Vector3f& origin, const Vector3f& dir, Vector3f& hitPoint,
+						Vector3f& N,Material& hitMaterial, const vector<const Model*>& objects) {
 		float maxDistance = numeric_limits<float>::max();
 		for (const Model* o : objects) {
 			float distanceI;
 			if (o->rayIntersect(origin, dir, distanceI) && distanceI < maxDistance) {
 				maxDistance = distanceI;
+				hitPoint = origin + dir * distanceI;
+				N = o->getNormal(hitPoint).getNormalized();
+				hitMaterial = Material(*o->getMaterial());
 			}
 		}
 		return (maxDistance < 1000);
@@ -61,19 +67,26 @@ public:
 		ofstream out;
 		out.open(fileName, std::ofstream::out | std::ofstream::binary);
 		out << "P6\n" << width << " " << height << "\n255\n";
-		for (uint32_t i = 0; i < width*height; i++) {
-			for (uint32_t j = 0; j < 3; j++) {
-				out << (char)(255 * max(0.0f,min(1.0f,buffer[i][j])));
+		char* outputBuffer = new char[width*height * 3];
+		for (uint32_t y = 0; y < height; y++) {
+			for (uint32_t x = 0; x < width; x++) {
+				uint32_t colorIndex = index(x, y);
+				for (int i = 0; i < 3; i++) {
+					outputBuffer[colorIndex * 3 + i] = 
+						(char)(255 * max(0.0f, min(1.0f, buffer[colorIndex][i])));
+				}
 			}
 		}
+		out << outputBuffer;
 		out.close();
+		delete outputBuffer;
 		DEBUG("OUTPUT FINISHED");
 		timer.stop = clock();
 		DEBUG("ELAPSED TIME: " + to_string(timer.stop - timer.start) + "ms");
 		return true;
 	}
 public:
-	void addObject(const Model* s) {
+	void addModel(const Model* s) {
 		objects.push_back(s);
 	}
 private:
