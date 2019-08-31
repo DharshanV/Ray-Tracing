@@ -10,6 +10,7 @@
 #include "Vector3f.h"
 #include "Debug.h"
 #include "Model.h"
+#include "Light.h"
 using namespace std;
 
 class Renderer {
@@ -30,20 +31,28 @@ public:
 				float dirX = (2.0f * (i + 0.5f) / (float)width - 1)*tan(fov / 2.0f)*width / (float)height;
 				float dirY = -(2.0f * (j + 0.5f) / (float)height - 1)*tan(fov / 2.0f);
 				Vector3f dir = Vector3f(dirX, dirY, -1).getNormalized();
-				buffer[index(i,j)] = castRay(rayOrigin, dir, objects);
+				buffer[index(i, j)] = castRay(rayOrigin, dir, objects, lights);
 			}
 		}
 		DEBUG("BUFFER FILLED");
+		timer.stop = clock();
 		return true;
 	}
 
-	Vector3f castRay(const Vector3f& origin, const Vector3f& dir,const vector<const Model*>& objects) {
+	Vector3f castRay(const Vector3f& origin, const Vector3f& dir,
+			const vector<const Model*>& objects, const vector<const Light*>& lights) {
 		Vector3f hitPoint, N;
 		Material hitMaterial;
 		if (!sceneIntersect(origin,dir, hitPoint, N, hitMaterial, objects)) {
 			return Vector3f(0.2f, 0.3f, 0.3f);
 		}
-		return hitMaterial.diffuse();
+
+		float lightIntensity = 0;
+		for (const Light* l : lights) {
+			Vector3f pointToLight = (*l->getPosition()-hitPoint).getNormalized();
+			lightIntensity += (l->getIntensity() * max(0.0f,N.dot(pointToLight)));
+		}
+		return hitMaterial.diffuse() * lightIntensity;
 	}
 
 	bool sceneIntersect(const Vector3f& origin, const Vector3f& dir, Vector3f& hitPoint,
@@ -73,7 +82,7 @@ public:
 				uint32_t colorIndex = index(x, y);
 				for (int i = 0; i < 3; i++) {
 					outputBuffer[colorIndex * 3 + i] = 
-						(char)(255 * max(0.0f, min(1.0f, buffer[colorIndex][i])));
+						(char)(255 * max(0.01f, min(1.0f, buffer[colorIndex][i])));
 				}
 			}
 		}
@@ -81,13 +90,16 @@ public:
 		out.close();
 		delete outputBuffer;
 		DEBUG("OUTPUT FINISHED");
-		timer.stop = clock();
 		DEBUG("ELAPSED TIME: " + to_string(timer.stop - timer.start) + "ms");
 		return true;
 	}
 public:
 	void addModel(const Model* s) {
 		objects.push_back(s);
+	}
+
+	void addLight(const Light* l) {
+		lights.push_back(l);
 	}
 private:
 	uint32_t index(uint32_t i, uint32_t j) {
@@ -99,6 +111,9 @@ private:
 		for (const Model* o : objects) {
 			if (o != NULL) { delete o; o = NULL; }
 		}
+		for (const Light* i : lights) {
+			if (i != NULL) { delete i; i = NULL; }
+		}
 		DEBUG("CLEARED OBJECTS");
 	}
 private:
@@ -107,6 +122,7 @@ private:
 private:
 	vector<Vector3f> buffer;
 	vector<const Model*> objects;
+	vector<const Light*> lights;
 	Vector3f rayOrigin;
 private:
 	float fov;

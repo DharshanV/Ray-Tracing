@@ -8,7 +8,10 @@ int main() {
 
 	renderer.addModel(new Sphere(Vector3f(-2, 0, -3), 1, Material(0.4f,0.4f,0.3f)));
 	renderer.addModel(new Sphere(Vector3f(2, 0, -5), 1, Material(0.3f, 0.2f, 0.6f)));
-	renderer.addModel(new Sphere(Vector3f(0, -3, -10), 1, Material(0.6f, 0.2f, 0.3f)));
+	renderer.addModel(new Sphere(Vector3f(0, -1, -7), 1, Material(0.6f, 0.2f, 0.3f)));
+	
+	renderer.addLight(new Light(20.0f, 20.0f, 20.0f,1.5f));
+	renderer.addLight(new Light(-20.0f, 20.0f, 20.0f, .5f));
 
 	renderer.start();
 	renderer.output(fileName);
