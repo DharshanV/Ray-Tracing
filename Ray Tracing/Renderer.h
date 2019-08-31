@@ -10,12 +10,11 @@
 #include "Vector3f.h"
 #include "Debug.h"
 #include "Model.h"
-
 using namespace std;
 
 class Renderer {
 public:
-	Renderer(float width, float height,Vector3f eye = Vector3f(0),float fov = 45.0f) : 
+	Renderer(uint32_t width, uint32_t height,Vector3f eye = Vector3f(0),float fov = 45.0f) :
 		width(width), height(height), rayOrigin(eye),fov(fov) {
 		rendererStarted = false;
 		buffer.resize(width*height);
@@ -26,12 +25,12 @@ public:
 		rendererStarted = true;
 		timer.start = clock();
 		DEBUG("PUTTING IN BUFFER");
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				float dirX = (2 * (y + 0.5) / (float)width - 1)*tan(fov / 2.)*width / (float)height;
-				float dirY = -(2 * (x + 0.5) / (float)height - 1)*tan(fov / 2.);
+		for (uint32_t j = 0; j < height; j++) {
+			for (uint32_t i = 0; i < width; i++) {
+				float dirX = (2.0f * (i + 0.5f) / (float)width - 1)*tan(fov / 2.0f)*width / (float)height;
+				float dirY = -(2.0f * (j + 0.5f) / (float)height - 1)*tan(fov / 2.0f);
 				Vector3f dir = Vector3f(dirX, dirY, -1).getNormalized();
-				buffer[index(x, y)] = castRay(rayOrigin, dir, objects);
+				buffer[index(i,j)] = castRay(rayOrigin, dir, objects);
 			}
 		}
 		DEBUG("BUFFER FILLED");
@@ -40,7 +39,7 @@ public:
 
 	Vector3f castRay(const Vector3f& origin, const Vector3f& dir,const vector<const Model*>& objects) {
 		if (sceneIntersect(origin,dir, objects)) {
-			return Vector3f(0.2, 0.7, 0.8);
+			return Vector3f(1.0f, 0.5f, 0.2f);
 		}
 		return Vector3f(0.2f, 0.3f, 0.3f);
 	}
@@ -62,8 +61,8 @@ public:
 		ofstream out;
 		out.open(fileName, std::ofstream::out | std::ofstream::binary);
 		out << "P6\n" << width << " " << height << "\n255\n";
-		for (int i = 0; i < width*height; ++i) {
-			for (int j = 0; j < 3; j++) {
+		for (uint32_t i = 0; i < width*height; i++) {
+			for (uint32_t j = 0; j < 3; j++) {
 				out << (char)(255 * max(0.0f,min(1.0f,buffer[i][j])));
 			}
 		}
@@ -78,8 +77,8 @@ public:
 		objects.push_back(s);
 	}
 private:
-	int index(int x, int y) {
-		return x * height + y;
+	uint32_t index(uint32_t i, uint32_t j) {
+		return i + j * width;
 	}
 
 	void clearObjects() {
@@ -99,7 +98,7 @@ private:
 private:
 	float fov;
 	bool rendererStarted;
-	float width, height;
+	uint32_t width, height;
 };
 
 #endif // !RENDERER_H

@@ -81,7 +81,8 @@ public:
 		if (index == 0) return x;
 		if (index == 1) return y;
 		if (index == 2) return z;
-		assert(!true, "invalid index");
+		assert(!true);
+		return 0;
 	}
 
 	inline Vector3f operator - () {
