@@ -1,8 +1,8 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 #include "Vector3f.h"
-
-class Sphere {
+#include "Object.h"
+class Sphere : public Object {
 public:
 	Sphere() : position(0), radius(1) {}
 	Sphere(Vector3f position) : position(position), radius(1) {}
