@@ -1,17 +1,17 @@
-#ifndef VECTOR3F_H
-#define VECTOR3F_H
+#ifndef Vector3_H
+#define Vector3_H
 #include <iostream>
 #include <cmath>
 #include <assert.h>
 using namespace std;
-class Vector3f {
+class Vector3 {
 public:
-	Vector3f() : x(0), y(0), z(0) { }
-	Vector3f(float x, float y, float z) : x(x), y(y), z(z) { }
-	Vector3f(float value) : x(value), y(value), z(value) { }
-	Vector3f(const Vector3f& v) : x(v.x), y(v.y), z(v.z) { }
+	Vector3() : x(0), y(0), z(0) { }
+	Vector3(float x, float y, float z) : x(x), y(y), z(z) { }
+	Vector3(float value) : x(value), y(value), z(value) { }
+	Vector3(const Vector3& v) : x(v.x), y(v.y), z(v.z) { }
 	void print(ostream& out) const { out << "[" << x << "," << y << "," << z<<"]"; }
-	virtual ~Vector3f() { }
+	virtual ~Vector3() { }
 public:
 	inline float normalize() {
 		float L = this->length();
@@ -19,8 +19,8 @@ public:
 		return L;
 	}
 
-	inline Vector3f getNormalized() {
-		Vector3f temp(*this);
+	inline Vector3 getNormalized() {
+		Vector3 temp(*this);
 		temp /= temp.length();
 		return temp;
 	}
@@ -29,12 +29,12 @@ public:
 		return this->sqrt(sqr(x) + sqr(y) + sqr(z));
 	}
 
-	inline float dot(const Vector3f& v) const {
+	inline float dot(const Vector3& v) const {
 		return x * v.x + y * v.y + z * v.z;
 	}
 
-	inline Vector3f cross(const Vector3f& v) const {
-		Vector3f temp;
+	inline Vector3 cross(const Vector3& v) const {
+		Vector3 temp;
 		temp.x = y * v.z - (v.y* z);
 		temp.y = -(x*v.z - (v.x * z));
 		temp.z = x * v.y - (v.x*y);
@@ -42,35 +42,35 @@ public:
 	}
 
 public:
-	inline Vector3f& operator = (const Vector3f& v) {
+	inline Vector3& operator = (const Vector3& v) {
 		x = v.x;
 		y = v.y;
 		z = v.z;
 		return *this;
 	}
 
-	inline Vector3f& operator += (const Vector3f& v) {
+	inline Vector3& operator += (const Vector3& v) {
 		x += v.x;
 		y += v.y;
 		z += v.z;
 		return *this;
 	}
 
-	inline Vector3f& operator -= (const Vector3f& v) {
+	inline Vector3& operator -= (const Vector3& v) {
 		x -= v.x;
 		y -= v.y;
 		z -= v.z;
 		return *this;
 	}
 
-	inline Vector3f& operator /= (float value) {
+	inline Vector3& operator /= (float value) {
 		x /= value;
 		y /= value;
 		z /= value;
 		return *this;
 	}
 
-	inline Vector3f& operator *= (float value) {
+	inline Vector3& operator *= (float value) {
 		x *= value;
 		y *= value;
 		z *= value;
@@ -85,8 +85,8 @@ public:
 		return 0;
 	}
 
-	inline Vector3f operator - () {
-		Vector3f temp(*this);
+	inline Vector3 operator - () {
+		Vector3 temp(*this);
 		temp *= -1;
 		return temp;
 	}
@@ -103,33 +103,33 @@ private:
 	float x, y, z;
 };
 
-inline Vector3f operator + (const Vector3f& a, const Vector3f& b) {
-	Vector3f temp(a);
+inline Vector3 operator + (const Vector3& a, const Vector3& b) {
+	Vector3 temp(a);
 	temp += b;
 	return temp;
 }
 
-inline Vector3f operator - (const Vector3f& a, const Vector3f& b) {
-	Vector3f temp(a);
+inline Vector3 operator - (const Vector3& a, const Vector3& b) {
+	Vector3 temp(a);
 	temp -= b;
 	return temp;
 }
 
-inline Vector3f operator * (const Vector3f& a, float value) {
-	Vector3f temp(a);
+inline Vector3 operator * (const Vector3& a, float value) {
+	Vector3 temp(a);
 	temp *= value;
 	return temp;
 }
 
-inline Vector3f operator / (const Vector3f& a, float value) {
-	Vector3f temp(a);
+inline Vector3 operator / (const Vector3& a, float value) {
+	Vector3 temp(a);
 	temp /= value;
 	return temp;
 }
 
-ostream& operator << (ostream& out, const Vector3f& a) {
+ostream& operator << (ostream& out, const Vector3& a) {
 	a.print(out);
 	return out;
 }
 
-#endif // !VECTOR3F_H
+#endif // !Vector3_H

@@ -7,30 +7,40 @@
 #include <limits>
 #include <time.h>
 #include <string>
-#include "Vector3f.h"
 #include "Debug.h"
 #include "Model.h"
 #include "Light.h"
 using namespace std;
 
+typedef uint32_t uint;
+typedef const Vector3 CVector3;
+typedef const Light CLight;
+typedef const Model CModel;
+typedef vector<const Light*> VLight;
+typedef vector<const Model*> VModel;
+typedef const vector<const Light*> CVLight;
+typedef const vector<const Model*> CVModel;
+
 class Renderer {
 public:
-	Renderer(uint32_t width, uint32_t height,Vector3f eye = Vector3f(0),float fov = 45.0f) :
-		width(width), height(height), rayOrigin(eye),fov(fov) {
+	Renderer(uint width, uint height, Vector3 eye = Vector3(0), float fov = 45.0f) :
+		width(width), height(height), rayOrigin(eye), fov(fov) {
 		rendererStarted = false;
 		buffer.resize(width*height);
 	}
-	~Renderer() { clearObjects(); }
+	~Renderer() {
+		clearObjects();
+	}
 public:
 	bool start() {
 		rendererStarted = true;
 		timer.start = clock();
 		DEBUG("PUTTING IN BUFFER");
-		for (uint32_t j = 0; j < height; j++) {
-			for (uint32_t i = 0; i < width; i++) {
+		for (uint j = 0; j < height; j++) {
+			for (uint i = 0; i < width; i++) {
 				float dirX = (2.0f * (i + 0.5f) / (float)width - 1)*tan(fov / 2.0f)*width / (float)height;
 				float dirY = -(2.0f * (j + 0.5f) / (float)height - 1)*tan(fov / 2.0f);
-				Vector3f dir = Vector3f(dirX, dirY, -1).getNormalized();
+				Vector3 dir = Vector3(dirX, dirY, -1).getNormalized();
 				buffer[index(i, j)] = castRay(rayOrigin, dir, objects, lights);
 			}
 		}
@@ -39,30 +49,28 @@ public:
 		return true;
 	}
 
-	Vector3f castRay(const Vector3f& origin, const Vector3f& dir,
-			const vector<const Model*>& objects, const vector<const Light*>& lights) {
-		Vector3f hitPoint, N;
+	Vector3 castRay(CVector3& origin, CVector3& dir, CVModel& objects, CVLight& lights) {
+		Vector3 hitPoint, N;
 		Material hitMaterial;
-		if (!sceneIntersect(origin,dir, hitPoint, N, hitMaterial, objects)) {
-			return Vector3f(0.2f, 0.3f, 0.3f);
+		if (!sceneIntersect(origin, dir, hitPoint, N, hitMaterial, objects)) {
+			return Vector3(0.2f, 0.3f, 0.3f);
 		}
 
 		float diffuseIntensity = 0;
 		float specularIntensity = 0;
-		for (const Light* l : lights) {
-			Vector3f lightToPoint = (*l->getPosition()-hitPoint).getNormalized();
-			Vector3f reflectedLight = -reflect(-lightToPoint, N).getNormalized();
-			diffuseIntensity += (l->getIntensity() * max(0.0f,N.dot(lightToPoint)));
-			specularIntensity += (l->getIntensity() * 
-						powf(max(0.0f, reflectedLight.dot(dir)),hitMaterial.specular()));
+		for (CLight* l : lights) {
+			Vector3 lightToPoint = (*l->getPosition() - hitPoint).getNormalized();
+			Vector3 reflectedLight = -reflect(-lightToPoint, N).getNormalized();
+			diffuseIntensity += (l->getIntensity() * max(0.0f, N.dot(lightToPoint)));
+			specularIntensity += (l->getIntensity() *
+								  powf(max(0.0f, reflectedLight.dot(dir)), hitMaterial.specular()));
 		}
-		return hitMaterial.diffuse() * diffuseIntensity + Vector3f(1) * specularIntensity;
+		return hitMaterial.diffuse() * diffuseIntensity + Vector3(1) * specularIntensity;
 	}
-
-	bool sceneIntersect(const Vector3f& origin, const Vector3f& dir, Vector3f& hitPoint,
-						Vector3f& N,Material& hitMaterial, const vector<const Model*>& objects) {
-		float maxDistance = numeric_limits<float>::max();
-		for (const Model* o : objects) {
+	bool sceneIntersect(CVector3& origin, CVector3& dir, Vector3& hitPoint,
+						Vector3& N, Material& hitMaterial, CVModel& objects) {
+		float maxDistance = FLT_MAX;
+		for (CModel* o : objects) {
 			float distanceI;
 			if (o->rayIntersect(origin, dir, distanceI) && distanceI < maxDistance) {
 				maxDistance = distanceI;
@@ -73,7 +81,6 @@ public:
 		}
 		return (maxDistance < 1000);
 	}
-
 	bool output(const char* fileName) {
 		if (!rendererStarted) { DEBUG("RENDER NOT STARTED");  return false; }
 		DEBUG("OUTPUT STARTED");
@@ -81,11 +88,11 @@ public:
 		out.open(fileName, std::ofstream::out | std::ofstream::binary);
 		out << "P6\n" << width << " " << height << "\n255\n";
 		char* outputBuffer = new char[width*height * 3];
-		for (uint32_t y = 0; y < height; y++) {
-			for (uint32_t x = 0; x < width; x++) {
-				uint32_t colorIndex = index(x, y);
+		for (uint y = 0; y < height; y++) {
+			for (uint x = 0; x < width; x++) {
+				uint colorIndex = index(x, y);
 				for (int i = 0; i < 3; i++) {
-					outputBuffer[colorIndex * 3 + i] = 
+					outputBuffer[colorIndex * 3 + i] =
 						(char)(255 * max(0.01f, min(1.0f, buffer[colorIndex][i])));
 				}
 			}
@@ -98,23 +105,20 @@ public:
 		return true;
 	}
 
-	Vector3f reflect(const Vector3f& A, const Vector3f& B) {
+	Vector3 reflect(CVector3& A, CVector3& B) {
 		return A + (B * -2) * (B.dot(A));
 	}
-
 public:
-	void addModel(const Model* s) {
+	void addModel(CModel* s) {
 		objects.push_back(s);
 	}
-
-	void addLight(const Light* l) {
+	void addLight(CLight* l) {
 		lights.push_back(l);
 	}
 private:
-	uint32_t index(uint32_t i, uint32_t j) {
+	uint index(uint i, uint j) {
 		return i + j * width;
 	}
-
 	void clearObjects() {
 		DEBUG("DELETING OBJECTS");
 		for (const Model* o : objects) {
@@ -129,14 +133,14 @@ private:
 	struct Timer { clock_t start, stop; };
 	Timer timer;
 private:
-	vector<Vector3f> buffer;
-	vector<const Model*> objects;
-	vector<const Light*> lights;
-	Vector3f rayOrigin;
+	vector<Vector3> buffer;
+	VModel objects;
+	VLight lights;
+	Vector3 rayOrigin;
 private:
 	float fov;
 	bool rendererStarted;
-	uint32_t width, height;
+	uint width, height;
 };
 
 #endif // !RENDERER_H

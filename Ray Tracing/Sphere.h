@@ -4,13 +4,13 @@
 class Sphere : public Model {
 public:
 	Sphere() : position(0), radius(1) {}
-	Sphere(Vector3f position) : position(position), radius(1) {}
-	Sphere(Vector3f position,float r,Material mat) :
+	Sphere(Vector3 position) : position(position), radius(1) {}
+	Sphere(Vector3 position,float r,Material mat) :
 			position(position), radius(r), material(mat) {}
 	~Sphere() {}
 public:
-	bool rayIntersect(const Vector3f& origin, const Vector3f& dir,float& t) const {
-		Vector3f oToC = position - origin;
+	bool rayIntersect(const Vector3& origin, const Vector3& dir,float& t) const {
+		Vector3 oToC = position - origin;
 		float t1 = dir.dot(oToC);					//t1 when ray is closest to sphere
 		float rayToC = oToC.dot(oToC) - t1 * t1;
 		if (rayToC > radius) return false;
@@ -27,12 +27,12 @@ public:
 
 	const Material* getMaterial() const { return &material; }
 
-	Vector3f getNormal(const Vector3f& hit) const {
+	Vector3 getNormal(const Vector3& hit) const {
 		return hit - position;
 	}
 private:
 	Material material;
-	Vector3f position;
+	Vector3 position;
 	float radius;
 };
 
