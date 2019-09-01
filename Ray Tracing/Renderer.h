@@ -47,12 +47,16 @@ public:
 			return Vector3f(0.2f, 0.3f, 0.3f);
 		}
 
-		float lightIntensity = 0;
+		float diffuseIntensity = 0;
+		float specularIntensity = 0;
 		for (const Light* l : lights) {
-			Vector3f pointToLight = (*l->getPosition()-hitPoint).getNormalized();
-			lightIntensity += (l->getIntensity() * max(0.0f,N.dot(pointToLight)));
+			Vector3f lightToPoint = (*l->getPosition()-hitPoint).getNormalized();
+			Vector3f reflectedLight = -reflect(-lightToPoint, N).getNormalized();
+			diffuseIntensity += (l->getIntensity() * max(0.0f,N.dot(lightToPoint)));
+			specularIntensity += (l->getIntensity() * 
+						powf(max(0.0f, reflectedLight.dot(dir)),hitMaterial.specular()));
 		}
-		return hitMaterial.diffuse() * lightIntensity;
+		return hitMaterial.diffuse() * diffuseIntensity + Vector3f(1) * specularIntensity;
 	}
 
 	bool sceneIntersect(const Vector3f& origin, const Vector3f& dir, Vector3f& hitPoint,
@@ -93,6 +97,11 @@ public:
 		DEBUG("ELAPSED TIME: " + to_string(timer.stop - timer.start) + "ms");
 		return true;
 	}
+
+	Vector3f reflect(const Vector3f& A, const Vector3f& B) {
+		return A + (B * -2) * (B.dot(A));
+	}
+
 public:
 	void addModel(const Model* s) {
 		objects.push_back(s);
