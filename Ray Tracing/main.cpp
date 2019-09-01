@@ -12,7 +12,7 @@ int main() {
 	renderer.addModel(new Sphere(Vector3f(0, -1, -7), 1, Material(0.6f, 0.2f, 0.3f,32)));
 	
 	renderer.addLight(new Light(20.0f, 20.0f, 20.0f, 0.7f));
-	renderer.addLight(new Light(-20.0f, 20.0f, 20.0f, 0.5f));
+	renderer.addLight(new Light(-20.0f, 20.0f, 20.0f, 1.5f));
 
 	renderer.start();
 	renderer.output(fileName);
