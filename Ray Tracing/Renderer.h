@@ -16,6 +16,7 @@ typedef uint32_t uint;
 typedef const Vector3 CVector3;
 typedef const Light CLight;
 typedef const Model CModel;
+typedef const Material CMaterial;
 typedef vector<const Light*> VLight;
 typedef vector<const Model*> VModel;
 typedef const vector<const Light*> CVLight;
@@ -38,10 +39,7 @@ public:
 		DEBUG("PUTTING IN BUFFER");
 		for (uint j = 0; j < height; j++) {
 			for (uint i = 0; i < width; i++) {
-				float dirX = (2.0f * (i + 0.5f) / (float)width - 1)*tan(fov / 2.0f)*width / (float)height;
-				float dirY = -(2.0f * (j + 0.5f) / (float)height - 1)*tan(fov / 2.0f);
-				Vector3 dir = Vector3(dirX, dirY, -1).getNormalized();
-				buffer[index(i, j)] = castRay(rayOrigin, dir, objects, lights);
+				buffer[index(i, j)] = castRay(rayOrigin, getRay(i,j), objects, lights);
 			}
 		}
 		DEBUG("BUFFER FILLED");
@@ -60,13 +58,16 @@ public:
 		float specularIntensity = 0;
 		for (CLight* l : lights) {
 			Vector3 lightToPoint = (*l->getPosition() - hitPoint).getNormalized();
-			Vector3 reflectedLight = -reflect(-lightToPoint, N).getNormalized();
-			diffuseIntensity += (l->getIntensity() * max(0.0f, N.dot(lightToPoint)));
-			specularIntensity += (l->getIntensity() *
-								  powf(max(0.0f, reflectedLight.dot(dir)), hitMaterial.specular()));
+			Vector3 reflectedLight = reflect(-lightToPoint, N).getNormalized();
+
+			if (inShadow(l, hitPoint,N, lightToPoint, objects)) continue;
+
+			diffuseIntensity += getDiffuse(l, N, lightToPoint);
+			specularIntensity += getSpecular(l, reflectedLight, dir, hitMaterial);
 		}
 		return hitMaterial.diffuse() * diffuseIntensity + Vector3(1) * specularIntensity;
 	}
+
 	bool sceneIntersect(CVector3& origin, CVector3& dir, Vector3& hitPoint,
 						Vector3& N, Material& hitMaterial, CVModel& objects) {
 		float maxDistance = FLT_MAX;
@@ -81,6 +82,7 @@ public:
 		}
 		return (maxDistance < 1000);
 	}
+
 	bool output(const char* fileName) {
 		if (!rendererStarted) { DEBUG("RENDER NOT STARTED");  return false; }
 		DEBUG("OUTPUT STARTED");
@@ -105,10 +107,6 @@ public:
 		return true;
 	}
 
-	Vector3 reflect(CVector3& A, CVector3& B) {
-		return A + (B * -2) * (B.dot(A));
-	}
-public:
 	void addModel(CModel* s) {
 		objects.push_back(s);
 	}
@@ -119,6 +117,7 @@ private:
 	uint index(uint i, uint j) {
 		return i + j * width;
 	}
+
 	void clearObjects() {
 		DEBUG("DELETING OBJECTS");
 		for (const Model* o : objects) {
@@ -129,18 +128,46 @@ private:
 		}
 		DEBUG("CLEARED OBJECTS");
 	}
+
+	Vector3 reflect(CVector3& A, CVector3& B) {
+		return 2 * ( (B.dot(A)) * B ) - A;
+	}
+
+	Vector3 getRay(uint i,uint j) {
+		float dirX = (2.0f * (i + 0.5f) / (float)width - 1)*tan(fov / 2.0f)*width / (float)height;
+		float dirY = -(2.0f * (j + 0.5f) / (float)height - 1)*tan(fov / 2.0f);
+		return Vector3(dirX, dirY, -1).getNormalized();
+	}
+
+	float getDiffuse(CLight* l,CVector3& N,CVector3& light) {
+		return l->getIntensity() * max(0.0f, N.dot(light));
+	}
+	
+	float getSpecular(CLight* l,CVector3& R,CVector3& E,CMaterial& mat) {
+		return l->getIntensity() * powf(max(0.0f, R.dot(E)), mat.specular());
+	}
+
+	bool inShadow(CLight* l, CVector3& rayHit, CVector3& hitN, CVector3& dirToLight, CVModel& objects) {
+		Vector3 hitPoint, N, origin;
+		Material hitMaterial;
+		float lightDistance = (origin - *l->getPosition()).length();
+		origin = (dirToLight.dot(hitN) >= 0) ? rayHit + hitN * .001f : rayHit - hitN * .001f;
+		if (sceneIntersect(origin, dirToLight, hitPoint, N, hitMaterial, objects) &&
+			(hitPoint - origin).length() < lightDistance) {
+			return true;
+		}
+		return false;
+	}
 private:
 	struct Timer { clock_t start, stop; };
-	Timer timer;
-private:
 	vector<Vector3> buffer;
+	bool rendererStarted;
+	Vector3 rayOrigin;
+	uint width, height;
 	VModel objects;
 	VLight lights;
-	Vector3 rayOrigin;
-private:
+	Timer timer;
 	float fov;
-	bool rendererStarted;
-	uint width, height;
 };
 
 #endif // !RENDERER_H

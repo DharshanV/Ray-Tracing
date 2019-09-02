@@ -121,6 +121,12 @@ inline Vector3 operator * (const Vector3& a, float value) {
 	return temp;
 }
 
+inline Vector3 operator * (float value, const Vector3& a) {
+	Vector3 temp(a);
+	temp *= value;
+	return temp;
+}
+
 inline Vector3 operator / (const Vector3& a, float value) {
 	Vector3 temp(a);
 	temp /= value;

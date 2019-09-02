@@ -7,7 +7,7 @@ public:
 	Material(const Vector3& diffuse) : diffuseColor(diffuse) { }
 	Material(float r,float g,float b,float specular) : diffuseColor(r,g,b), specularExpo(specular) { }
 	const Vector3 diffuse() { return diffuseColor; }
-	const float specular() { return specularExpo; }
+	const float specular() const { return specularExpo; }
 private:
 	Vector3 diffuseColor;
 	float specularExpo;
