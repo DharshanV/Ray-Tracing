@@ -15,7 +15,7 @@ public:
 			Vector3 hitToP0 = p0 - origin;
 			hitToP0 /= denom;
 			t = hitToP0.dot(N);
-			return (t >= 0);
+			return (t >= 0 && t <= 100);
 		}
 		return false;
 	}

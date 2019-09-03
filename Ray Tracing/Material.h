@@ -2,7 +2,7 @@
 #include "Vector3.h"
 class Material {
 public:
-	Material() : albedoColor(1), diffuseColor(0), specularExpo(2) { }
+	Material() : albedoColor(1,0,0), diffuseColor(0), specularExpo(2) { }
 	Material(const Material& m) : albedoColor(m.albedoColor), diffuseColor(m.diffuseColor), specularExpo(m.specularExpo){}
 	Material(const Vector3& a,const Vector3& color,float specular) : albedoColor(a), diffuseColor(color), specularExpo(specular) { }
 

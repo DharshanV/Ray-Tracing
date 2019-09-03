@@ -47,12 +47,15 @@ public:
 		return true;
 	}
 
-	Vector3 castRay(CVector3& origin, CVector3& dir, CVModel& objects, CVLight& lights) {
+	Vector3 castRay(CVector3& origin, CVector3& dir, CVModel& objects, CVLight& lights,uint depth = 0) {
 		Vector3 hitPoint, N;
 		Material hitMaterial;
-		if (!sceneIntersect(origin, dir, hitPoint, N, hitMaterial, objects)) {
+		if (depth > 4 || !sceneIntersect(origin, dir, hitPoint, N, hitMaterial, objects)) {
 			return background;
 		}
+		Vector3 reflectDir = -reflect(dir, N);
+		Vector3 reflectOrigin = reflectDir.dot(N) < 0 ? hitPoint - N * .001f : hitPoint + N * .001f;
+		Vector3 reflectColor = castRay(reflectOrigin, reflectDir, objects, lights, depth + 1);
 
 		float diffuseIntensity = 0;
 		float specularIntensity = 0;
@@ -66,7 +69,8 @@ public:
 			specularIntensity += getSpecular(l, reflectedLight, dir, hitMaterial);
 		}
 		return hitMaterial.diffuse() * diffuseIntensity * hitMaterial.albedo()[0] +
-				Vector3(1) * specularIntensity * hitMaterial.albedo()[1];
+				Vector3(1) * specularIntensity * hitMaterial.albedo()[1] + 
+				reflectColor * hitMaterial.albedo()[2];
 	}
 
 	bool sceneIntersect(CVector3& origin, CVector3& dir, Vector3& hitPoint,
@@ -81,7 +85,19 @@ public:
 				hitMaterial = Material(*o->getMaterial());
 			}
 		}
-		return maxDistance < 1000;
+		float checkerboard_dist = std::numeric_limits<float>::max();
+		if (fabs(dir[1]) > 1e-3) {
+			float d = -(origin[1] + 5) / dir[1]; // the checkerboard plane has equation y = -4
+			Vector3 pt = origin + dir * d;
+			if (d > 0 && fabs(pt[0]) < 10 && pt[2]<-10 && pt[2]>-30 && d < maxDistance) {
+				checkerboard_dist = d;
+				hitPoint = pt;
+				N = Vector3(0, 1, 0);
+				Vector3 diffuse_color = (int(.5*hitPoint[0] + 1000) + int(.5*hitPoint[2])) & 1 ? Vector3(1, 1, 1) : Vector3(1, .7, .3);
+				hitMaterial.setDiffuse(diffuse_color*.3);
+			}
+		}
+		return std::min(maxDistance, checkerboard_dist) < 1000;
 	}
 
 	bool output(const char* fileName) {
