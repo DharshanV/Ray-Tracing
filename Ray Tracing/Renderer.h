@@ -51,7 +51,7 @@ public:
 		Vector3 hitPoint, N;
 		Material hitMaterial;
 		if (!sceneIntersect(origin, dir, hitPoint, N, hitMaterial, objects)) {
-			return Vector3(0.2f, 0.3f, 0.3f);
+			return background;
 		}
 
 		float diffuseIntensity = 0;
@@ -65,7 +65,8 @@ public:
 			diffuseIntensity += getDiffuse(l, N, lightToPoint);
 			specularIntensity += getSpecular(l, reflectedLight, dir, hitMaterial);
 		}
-		return hitMaterial.diffuse() * diffuseIntensity + Vector3(1) * specularIntensity;
+		return hitMaterial.diffuse() * diffuseIntensity * hitMaterial.albedo()[0] +
+				Vector3(1) * specularIntensity * hitMaterial.albedo()[1];
 	}
 
 	bool sceneIntersect(CVector3& origin, CVector3& dir, Vector3& hitPoint,
@@ -80,7 +81,7 @@ public:
 				hitMaterial = Material(*o->getMaterial());
 			}
 		}
-		return (maxDistance < 1000);
+		return maxDistance < 1000;
 	}
 
 	bool output(const char* fileName) {
@@ -110,8 +111,13 @@ public:
 	void addModel(CModel* s) {
 		objects.push_back(s);
 	}
+
 	void addLight(CLight* l) {
 		lights.push_back(l);
+	}
+
+	void backgroundColor(CVector3& color) {
+		background = color;
 	}
 private:
 	uint index(uint i, uint j) {
@@ -163,6 +169,7 @@ private:
 	vector<Vector3> buffer;
 	bool rendererStarted;
 	Vector3 rayOrigin;
+	Vector3 background;
 	uint width, height;
 	VModel objects;
 	VLight lights;

@@ -85,6 +85,14 @@ public:
 		return 0;
 	}
 
+	inline float operator [] (int index) const {
+		if (index == 0) return x;
+		if (index == 1) return y;
+		if (index == 2) return z;
+		assert(!true);
+		return 0;
+	}
+
 	inline Vector3 operator - () {
 		Vector3 temp(*this);
 		temp *= -1;
