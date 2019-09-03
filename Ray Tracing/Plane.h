@@ -6,7 +6,7 @@ typedef const Vector3 CVector3;
 
 class Plane : public Model{
 public:
-	Plane(CVector3& p0, CVector3& N,CMaterial& mat) : p0(p0), N(N),material(mat) {
+	Plane(CVector3& center, CVector3& N,CMaterial& mat) : p0(center), N(N),material(mat) {
 
 	}
 	bool rayIntersect(const Vector3& origin, const Vector3& dir, float& t) const {

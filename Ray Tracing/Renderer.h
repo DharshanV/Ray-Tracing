@@ -37,6 +37,7 @@ public:
 		rendererStarted = true;
 		timer.start = clock();
 		DEBUG("PUTTING IN BUFFER");
+		#pragma omp parallel for
 		for (uint j = 0; j < height; j++) {
 			for (uint i = 0; i < width; i++) {
 				buffer[index(i, j)] = castRay(rayOrigin, getRay(i,j), objects, lights);
@@ -85,19 +86,20 @@ public:
 				hitMaterial = Material(*o->getMaterial());
 			}
 		}
-		float checkerboard_dist = std::numeric_limits<float>::max();
-		if (fabs(dir[1]) > 1e-3) {
-			float d = -(origin[1] + 5) / dir[1]; // the checkerboard plane has equation y = -4
-			Vector3 pt = origin + dir * d;
-			if (d > 0 && fabs(pt[0]) < 10 && pt[2]<-10 && pt[2]>-30 && d < maxDistance) {
-				checkerboard_dist = d;
-				hitPoint = pt;
-				N = Vector3(0, 1, 0);
-				Vector3 diffuse_color = (int(.5*hitPoint[0] + 1000) + int(.5*hitPoint[2])) & 1 ? Vector3(1, 1, 1) : Vector3(1, .7, .3);
-				hitMaterial.setDiffuse(diffuse_color*.3);
-			}
-		}
-		return std::min(maxDistance, checkerboard_dist) < 1000;
+		//float checkerboard_dist = std::numeric_limits<float>::max();
+		//if (fabs(dir[1]) > 1e-3) {
+		//	float d = -(origin[1] + 5) / dir[1]; // the checkerboard plane has equation y = -4
+		//	Vector3 pt = origin + dir * d;
+		//	if (d > 0 && fabs(pt[0]) < 10 && pt[2]<-10 && pt[2]>-30 && d < maxDistance) {
+		//		checkerboard_dist = d;
+		//		hitPoint = pt;
+		//		N = Vector3(0, 1, 0);
+		//		Vector3 diffuse_color = (int(.5*hitPoint[0] + 1000) + int(.5*hitPoint[2])) & 1 ? Vector3(1, 1, 1) : Vector3(1, .7, .3);
+		//		hitMaterial.setDiffuse(diffuse_color*.3);
+		//	}
+		//}
+		//return std::min(maxDistance, checkerboard_dist) < 1000;
+		return maxDistance < 1000;
 	}
 
 	bool output(const char* fileName) {
