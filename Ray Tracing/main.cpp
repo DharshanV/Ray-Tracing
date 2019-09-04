@@ -1,27 +1,29 @@
 #include "Renderer.h"
 #include "Sphere.h"
 #include "Plane.h"
+
 int main() {
 	uint32_t width = 500;
 	uint32_t height = 500;
 	const char* fileName = "Rendered-Image.ppm";
-	Renderer renderer(width, height,Vector3(0));
-	renderer.backgroundColor(Vector3(0.2, 0.7, 0.8));
+	Renderer renderer(width, height,Vector3(0,0,0));
+	renderer.backgroundColor({"Skybox\\right.jpg","Skybox\\left.jpg" ,"Skybox\\bottom.jpg" ,
+							 "Skybox\\top.jpg" ,"Skybox\\front.jpg" ,"Skybox\\back.jpg" });
 
-	Material mirror(Vector3(0.0, 10.0, 0.8), Vector3(1), 1425.0f);
-	Material ivory(Vector3(0.6, 0.3,.2), Vector3(0.4, 0.4, 0.3), 50);
-	Material planeMat(Vector3(.3,0, 0), Vector3(0.909, 0.619, 0.619), 10);
-	Material red_rubber(Vector3(0.9, 0.1,0), Vector3(0.3, 0.1, 0.1), 10.);
+	Material      ivory(Vector3(0.6f, 0.3f, 0.1f), Vector3(0.4f, 0.4f, 0.3f), 200);
+	Material redRubber(Vector3(0.9f, 0.1f, 0.0f),Vector3(0.3f, 0.1f, 0.1f),10);
+	Material     mirror(Vector3(0.0f, 10.0f, 0.8f), Vector3(1.0f), 1425.);
+	Material plane(Vector3(.4f,.3f,0.0f), Vector3(0.4f, 0.4f, 0.3f), 10);
 
-	renderer.addModel(new Sphere(Vector3(-2, 0, -6), 1, ivory));
-	renderer.addModel(new Sphere(Vector3(0, 2, -10), 3, mirror));
-	renderer.addModel(new Sphere(Vector3(0, -2, -15), 4, mirror));
-	renderer.addModel(new Sphere(Vector3(2, 0, -6), 1, red_rubber));
-	renderer.addModel(new Plane(Vector3(0, -7, 0), Vector3(0, 1, 0), planeMat));
+	renderer.addModel(new Sphere(Vector3(-2.0f, 0.5f, -8.0f), 1, ivory));
+	renderer.addModel(new Sphere(Vector3(-2.0f, 1.0f, -3.0f), 1, redRubber));
+	renderer.addModel(new Sphere(Vector3(0.5,0.0f, -9.0f), 2, mirror));
+	renderer.addModel(new Sphere(Vector3(4.0f, 3.0f, -14.0f), 4, mirror));
+	renderer.addModel(new Plane(Vector3(0.0f,-2,-13.0f),Vector3(0,1,0),10,10, mirror));
 
-	renderer.addLight(new Light(-20, 20, 20, 1.5f));
-	renderer.addLight(new Light(30, 50, -25, 1.8f));
-	renderer.addLight(new Light(30, 20, 30, 1.7f));
+	renderer.addLight(new Light(Vector3(-20.0f, 20.0f, 20.0f), 1.5f));
+	renderer.addLight(new Light(Vector3(30.0f, 50.0f, -25.0f), 1.8f));
+	renderer.addLight(new Light(Vector3(30.0f, 20.0f, 30.0f), 1.7f));
 
 	renderer.start();
 	renderer.output(fileName);

@@ -129,6 +129,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Sphere.h" />
+    <ClInclude Include="stb_image.h" />
     <ClInclude Include="Vector3.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

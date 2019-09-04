@@ -10,9 +10,13 @@
 #include "Debug.h"
 #include "Model.h"
 #include "Light.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#define M_PI 3.14159
 using namespace std;
 
 typedef uint32_t uint;
+typedef unsigned char uchar;
 typedef const Vector3 CVector3;
 typedef const Light CLight;
 typedef const Model CModel;
@@ -24,10 +28,11 @@ typedef const vector<const Model*> CVModel;
 
 class Renderer {
 public:
-	Renderer(uint width, uint height, Vector3 eye = Vector3(0), float fov = 45.0f) :
+	Renderer(uint width, uint height, Vector3 eye = Vector3(0), float fov = M_PI/3) :
 		width(width), height(height), rayOrigin(eye), fov(fov) {
 		rendererStarted = false;
 		buffer.resize(width*height);
+		stbi_load("dasd", NULL, NULL, NULL, 0);
 	}
 	~Renderer() {
 		clearObjects();
@@ -52,7 +57,7 @@ public:
 		Vector3 hitPoint, N;
 		Material hitMaterial;
 		if (depth > 4 || !sceneIntersect(origin, dir, hitPoint, N, hitMaterial, objects)) {
-			return background;
+			return getBackground(dir);
 		}
 		Vector3 reflectDir = -reflect(dir, N);
 		Vector3 reflectOrigin = reflectDir.dot(N) < 0 ? hitPoint - N * .001f : hitPoint + N * .001f;
@@ -86,19 +91,6 @@ public:
 				hitMaterial = Material(*o->getMaterial());
 			}
 		}
-		//float checkerboard_dist = std::numeric_limits<float>::max();
-		//if (fabs(dir[1]) > 1e-3) {
-		//	float d = -(origin[1] + 5) / dir[1]; // the checkerboard plane has equation y = -4
-		//	Vector3 pt = origin + dir * d;
-		//	if (d > 0 && fabs(pt[0]) < 10 && pt[2]<-10 && pt[2]>-30 && d < maxDistance) {
-		//		checkerboard_dist = d;
-		//		hitPoint = pt;
-		//		N = Vector3(0, 1, 0);
-		//		Vector3 diffuse_color = (int(.5*hitPoint[0] + 1000) + int(.5*hitPoint[2])) & 1 ? Vector3(1, 1, 1) : Vector3(1, .7, .3);
-		//		hitMaterial.setDiffuse(diffuse_color*.3);
-		//	}
-		//}
-		//return std::min(maxDistance, checkerboard_dist) < 1000;
 		return maxDistance < 1000;
 	}
 
@@ -108,13 +100,13 @@ public:
 		ofstream out;
 		out.open(fileName, std::ofstream::out | std::ofstream::binary);
 		out << "P6\n" << width << " " << height << "\n255\n";
-		char* outputBuffer = new char[width*height * 3];
+		uchar* outputBuffer = new uchar[width*height * 3];
 		for (uint y = 0; y < height; y++) {
 			for (uint x = 0; x < width; x++) {
 				uint colorIndex = index(x, y);
 				for (int i = 0; i < 3; i++) {
 					outputBuffer[colorIndex * 3 + i] =
-						(char)(255 * max(0.01f, min(1.0f, buffer[colorIndex][i])));
+						(uchar)(255 * max(0.01f, min(1.0f, buffer[colorIndex][i])));
 				}
 			}
 		}
@@ -137,8 +129,23 @@ public:
 	void backgroundColor(CVector3& color) {
 		background = color;
 	}
+
+	void backgroundColor(const vector<string>& path) {
+		facesPath = path;
+		if (facesPath.size() != 6) return;
+		uchar* data;
+		int width, height, nChannels;
+		for (const string& pathi : path) {
+			data = stbi_load(pathi.c_str(), &width, &height, &nChannels, 3);
+			cubemaps.push_back({ data,width,height,nChannels });
+		}
+	} 
 private:
 	uint index(uint i, uint j) {
+		return i + j * width;
+	}
+
+	uint index(uint i, uint j,int width) {
 		return i + j * width;
 	}
 
@@ -150,6 +157,10 @@ private:
 		for (const Light* i : lights) {
 			if (i != NULL) { delete i; i = NULL; }
 		}
+		for (Cubemap& cubemap : cubemaps) {
+			stbi_image_free(cubemap.data);
+			cubemap.data = NULL;
+		}
 		DEBUG("CLEARED OBJECTS");
 	}
 
@@ -158,9 +169,10 @@ private:
 	}
 
 	Vector3 getRay(uint i,uint j) {
-		float dirX = (2.0f * (i + 0.5f) / (float)width - 1)*tan(fov / 2.0f)*width / (float)height;
-		float dirY = -(2.0f * (j + 0.5f) / (float)height - 1)*tan(fov / 2.0f);
-		return Vector3(dirX, dirY, -1).getNormalized();
+		float dirX = (i + 0.5f) - width / 2.0f;
+		float dirY = -(j + 0.5f) + height / 2.0f; 
+		float dirZ = -(height / (2.0f*tan(fov / 2.0f)));
+		return Vector3(dirX, dirY, dirZ).getNormalized();
 	}
 
 	float getDiffuse(CLight* l,CVector3& N,CVector3& light) {
@@ -182,9 +194,99 @@ private:
 		}
 		return false;
 	}
+
+	Vector3 getBackground(CVector3& direction) {
+		if (cubemaps.size() == 0) return background;
+		if (cubemaps.size() != 6) return Vector3(0);
+		float u, v;
+		int faceIndex;
+		vectorToUV(direction[0], -direction[1], direction[2], &faceIndex, &u, &v);
+		float RGB[3];
+		uint i = uint(u * cubemaps[faceIndex].width);
+		uint j = uint(v * cubemaps[faceIndex].height);
+		uint dataIndex = index(i, j, cubemaps[faceIndex].width);
+		for (int i = 0; i < 3; i++) 
+			RGB[i] = (float)cubemaps[faceIndex].data[dataIndex * 3 + i];
+		return Vector3(RGB[0],RGB[1],RGB[2])/255;
+	}
+
+	void vectorToUV(float x, float y, float z, int *index, float *u, float *v) {
+		float absX = fabs(x);
+		float absY = fabs(y);
+		float absZ = fabs(z);
+
+		int isXPositive = x > 0 ? 1 : 0;
+		int isYPositive = y > 0 ? 1 : 0;
+		int isZPositive = z > 0 ? 1 : 0;
+
+		float maxAxis, uc, vc;
+
+		// POSITIVE X
+		if (isXPositive && absX >= absY && absX >= absZ) {
+			// u (0 to 1) goes from +z to -z
+			// v (0 to 1) goes from -y to +y
+			maxAxis = absX;
+			uc = -z;
+			vc = y;
+			*index = 0;
+		}
+		// NEGATIVE X
+		if (!isXPositive && absX >= absY && absX >= absZ) {
+			// u (0 to 1) goes from -z to +z
+			// v (0 to 1) goes from -y to +y
+			maxAxis = absX;
+			uc = z;
+			vc = y;
+			*index = 1;
+		}
+		// POSITIVE Y
+		if (isYPositive && absY >= absX && absY >= absZ) {
+			// u (0 to 1) goes from -x to +x
+			// v (0 to 1) goes from +z to -z
+			maxAxis = absY;
+			uc = x;
+			vc = -z;
+			*index = 2;
+		}
+		// NEGATIVE Y
+		if (!isYPositive && absY >= absX && absY >= absZ) {
+			// u (0 to 1) goes from -x to +x
+			// v (0 to 1) goes from -z to +z
+			maxAxis = absY;
+			uc = x;
+			vc = z;
+			*index = 3;
+		}
+		// POSITIVE Z
+		if (isZPositive && absZ >= absX && absZ >= absY) {
+			// u (0 to 1) goes from -x to +x
+			// v (0 to 1) goes from -y to +y
+			maxAxis = absZ;
+			uc = x;
+			vc = y;
+			*index = 4;
+		}
+		// NEGATIVE Z
+		if (!isZPositive && absZ >= absX && absZ >= absY) {
+			// u (0 to 1) goes from +x to -x
+			// v (0 to 1) goes from -y to +y
+			maxAxis = absZ;
+			uc = -x;
+			vc = y;
+			*index = 5;
+		}
+
+		// Convert range from -1 to 1 to 0 to 1
+		*u = 0.5f * (uc / maxAxis + 1.0f);
+		*v = 0.5f * (vc / maxAxis + 1.0f);
+	}
+
 private:
 	struct Timer { clock_t start, stop; };
+	struct Cubemap { uchar* data; int width, height, channels; };
 	vector<Vector3> buffer;
+	vector<string> facesPath;
+	vector<Cubemap> cubemaps;
 	bool rendererStarted;
 	Vector3 rayOrigin;
 	Vector3 background;
