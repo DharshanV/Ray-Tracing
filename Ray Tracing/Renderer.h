@@ -7,12 +7,12 @@
 #include <limits>
 #include <time.h>
 #include <string>
+#include <thread>
 #include "Debug.h"
 #include "Model.h"
 #include "Light.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-#define M_PI 3.14159
 using namespace std;
 
 typedef uint32_t uint;
@@ -28,11 +28,10 @@ typedef const vector<const Model*> CVModel;
 
 class Renderer {
 public:
-	Renderer(uint width, uint height, Vector3 eye = Vector3(0), float fov = M_PI/3) :
+	Renderer(uint width, uint height, Vector3 eye = Vector3(0), float fov = 45.0f) :
 		width(width), height(height), rayOrigin(eye), fov(fov) {
 		rendererStarted = false;
 		buffer.resize(width*height);
-		stbi_load("dasd", NULL, NULL, NULL, 0);
 	}
 	~Renderer() {
 		clearObjects();
@@ -42,12 +41,18 @@ public:
 		rendererStarted = true;
 		timer.start = clock();
 		DEBUG("PUTTING IN BUFFER");
-		#pragma omp parallel for
-		for (uint j = 0; j < height; j++) {
-			for (uint i = 0; i < width; i++) {
-				buffer[index(i, j)] = castRay(rayOrigin, getRay(i,j), objects, lights);
-			}
-		}
+
+		uint dh = height / 2;
+		uint dw = width / 2;
+		thread workThread1(worker, this, 0, 0, dw, dh);
+		thread workThread2(worker, this, 0, dh, dw, dh*2);
+		thread workThread3(worker, this, dw, 0, dw*2, dh);
+		thread workThread4(worker, this, dw, dh, dw*2, dh*2);
+
+		workThread1.join();
+		workThread2.join();
+		workThread3.join();
+		workThread4.join();
 		DEBUG("BUFFER FILLED");
 		timer.stop = clock();
 		return true;
@@ -141,6 +146,15 @@ public:
 		}
 	} 
 private:
+	static void worker(Renderer* r,uint sHeight,uint sWidth,uint eHeight,uint eWidth) {
+		for (int i = sHeight; i < eHeight; i++) {
+			for (int j = sWidth; j < eWidth; j++) {
+				r->buffer[r->index(i, j)] = r->castRay(r->rayOrigin, r->getRay(i, j),
+													   r->objects, r->lights);
+			}
+		}
+	}
+
 	uint index(uint i, uint j) {
 		return i + j * width;
 	}
@@ -196,8 +210,7 @@ private:
 	}
 
 	Vector3 getBackground(CVector3& direction) {
-		if (cubemaps.size() == 0) return background;
-		if (cubemaps.size() != 6) return Vector3(0);
+		if (cubemaps.size() == 0 || cubemaps.size() != 6) return background;
 		float u, v;
 		int faceIndex;
 		vectorToUV(direction[0], -direction[1], direction[2], &faceIndex, &u, &v);

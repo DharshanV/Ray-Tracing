@@ -3,16 +3,16 @@
 #include "Plane.h"
 
 int main() {
-	uint32_t width = 500;
-	uint32_t height = 500;
+	uint32_t width = 1600;
+	uint32_t height = 900;
 	const char* fileName = "Rendered-Image.ppm";
 	Renderer renderer(width, height,Vector3(0,0,0));
 	renderer.backgroundColor({"Skybox\\right.jpg","Skybox\\left.jpg" ,"Skybox\\bottom.jpg" ,
 							 "Skybox\\top.jpg" ,"Skybox\\front.jpg" ,"Skybox\\back.jpg" });
 
-	Material      ivory(Vector3(0.6f, 0.3f, 0.1f), Vector3(0.4f, 0.4f, 0.3f), 200);
+	Material ivory(Vector3(0.6f, 0.3f, 0.1f), Vector3(0.4f, 0.4f, 0.3f), 200);
 	Material redRubber(Vector3(0.9f, 0.1f, 0.0f),Vector3(0.3f, 0.1f, 0.1f),10);
-	Material     mirror(Vector3(0.0f, 10.0f, 0.8f), Vector3(1.0f), 1425.);
+	Material mirror(Vector3(0.0f, 10.0f, 0.8f), Vector3(1.0f), 1425.);
 	Material plane(Vector3(.4f,.3f,0.0f), Vector3(0.4f, 0.4f, 0.3f), 10);
 
 	renderer.addModel(new Sphere(Vector3(-2.0f, 0.5f, -8.0f), 1, ivory));
