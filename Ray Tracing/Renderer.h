@@ -12,7 +12,7 @@
 #include "Model.h"
 #include "Light.h"
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "..\stb_image.h"
 using namespace std;
 
 typedef uint32_t uint;
@@ -42,8 +42,9 @@ public:
 		timer.start = clock();
 		DEBUG("PUTTING IN BUFFER");
 
-		uint dh = height / 2;
-		uint dw = width / 2;
+		uint splitCount = 2;
+		uint dh = height / splitCount;
+		uint dw = width / splitCount;
 		thread workThread1(worker, this, 0, 0, dw, dh);
 		thread workThread2(worker, this, 0, dh, dw, dh*2);
 		thread workThread3(worker, this, dw, 0, dw*2, dh);
