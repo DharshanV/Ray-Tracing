@@ -11,7 +11,7 @@ A simple Ray Tracer with basic geometry, lighting, reflection, and cubemap.
   - Breaking down screen into different parts for parallel ray tracing
 ## What can be improved
 - Biggest improvment is to implement path tracing
-- Putting scene data (triangles) into spatial data structure (Octree)
+- Putting scene data (triangles) into spatial data structure ([Octree](https://github.com/DharshanV/Octree-QuadTree))
 - Dynamic multithreading i.e. easily define number of splits per rectangle.
 
 ## All Rendering
