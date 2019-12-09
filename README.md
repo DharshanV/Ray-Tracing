@@ -4,7 +4,7 @@ A simple Ray Tracer with basic geometry, lighting, reflection, and cubemap.
 ## What I learned
 - Ray Intersections with sphere and plane. 
   - Vector operations: dot product and cross products.
-  - Usefulness of normal vectors
+  - Usefulness of normal vectors. Such as shadows and lightings
 - Getting pixel color value of cubemap from normal vector direction
 - Going form pixel coor (u,v) to view direction from camera (x,y,z)
 - Multithreading
