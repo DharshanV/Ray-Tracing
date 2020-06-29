@@ -15,4 +15,4 @@ A simple Ray Tracer with basic geometry, lighting, reflection, and cubemap.
 - Dynamic multithreading i.e. easily define number of splits per rectangle
 
 ## All Rendering
-![Output sample](https://github.com/DharshanV/Ray-Tracing/blob/master/Rendering%20Progress/All%20Rendering.png)
+![Output sample](https://i.imgur.com/fwfgw0l.png)
