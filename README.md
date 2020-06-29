@@ -1,5 +1,25 @@
 # Ray Tracing
-A simple Ray Tracer with basic geometry, lighting, reflection, and cubemap. 
+A simple Ray Tracer with basic geometry, lighting, reflection, cubemap, and supersampling. 
+
+I also wrote a book, that covers building a ray tracer from scratch. I walk through step by step on what all the code means and how they work. The book can be found be found above, Amazon, or the link here.
+
+## How to run
+The project comes with a tasks.json. So pressing Ctrl + Shift + b, should
+compile the program and create a exectuable "renderMain".
+
+Without using the tasks.json. We can compile using g++.
+
+In the root folder, type the command:
+
+g++ -g -pthread ./\*.cpp ./Utility/\*.cpp -o renderMain
+
+This will also create a exectuable "renderMain".
+
+To run the exectuable, expected arugments are:
+
+./renderMain \<width\> \<height\> \<fileName\> OR
+
+./renderMain \<width\> \<height\> \<splitCount\> \<fileName\>
 
 ## What I learned
 - Ray Intersections with sphere and plane. 
@@ -12,7 +32,6 @@ A simple Ray Tracer with basic geometry, lighting, reflection, and cubemap.
 ## What can be improved
 - Biggest improvment is to implement path tracing
 - Putting scene data (triangles) into spatial data structure ([Octree](https://github.com/DharshanV/Octree-QuadTree))
-- Dynamic multithreading i.e. easily define number of splits per rectangle
 
 ## All Rendering
 ![Output sample](https://i.imgur.com/fwfgw0l.png)
