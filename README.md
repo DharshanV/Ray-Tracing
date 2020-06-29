@@ -1,4 +1,4 @@
-# Ray-Tracing
+# Ray Tracing
 A simple Ray Tracer with basic geometry, lighting, reflection, and cubemap. 
 
 ## What I learned
