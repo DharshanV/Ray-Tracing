@@ -47,6 +47,7 @@
 *.sm
 
 build/
+Skybox
 
 # Ignore `bin` dir
 bin/
