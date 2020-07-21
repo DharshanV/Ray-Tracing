@@ -46,6 +46,8 @@
 *.class
 *.sm
 
+build/
+
 # Ignore `bin` dir
 bin/
 # or

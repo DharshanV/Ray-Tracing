@@ -1,8 +1,8 @@
 #ifndef PLANE_H
 #define PLANE_H
 
-#include "../Utility/Object.h"
-#include "../Utility/Vector3.h"
+#include "Object.h"
+#include "Vector3.h"
 
 #define MAX_DISTANCE 1000.0f
 typedef Vector3<float> vec3f;

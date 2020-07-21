@@ -7,12 +7,12 @@
 #include <thread>
 #include <vector>
 
+#include "Cubemap.h"
+#include "Vector3.h"
 #include "Objects/Light.h"
 #include "Objects/Plane.h"
 #include "Objects/Sphere.h"
-#include "Utility/Cubemap.h"
-#include "Utility/Object.h"
-#include "Utility/Vector3.h"
+#include "Objects/Object.h"
 
 using namespace std;
 
