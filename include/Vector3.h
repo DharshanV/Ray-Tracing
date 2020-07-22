@@ -3,7 +3,6 @@
 #include <math.h>
 
 #include <iostream>
-using namespace std;
 
 template <typename T>
 class Vector3 {
@@ -12,7 +11,7 @@ class Vector3 {
     Vector3(T x, T y, T z) : x(x), y(y), z(z) {}
     Vector3(T value) : x(value), y(value), z(value) {}
     Vector3(const Vector3<T>& v) : x(v.x), y(v.y), z(v.z) {}
-    void print(ostream& out) const {
+    void print(std::ostream& out) const {
         out << "[" << x << "," << y << "," << z << "]";
     }
     virtual ~Vector3() {}

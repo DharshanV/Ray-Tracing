@@ -1,13 +1,11 @@
 #include <fstream>
 #include <iostream>
 
-using namespace std;
-
 int main() {
     uint width = 500;
     uint height = 500;
     const char* fileName = "gradientColorImage.ppm";
-    ofstream outFile(fileName);  //opens the file to write
+    std::ofstream outFile(fileName);  //opens the file to write
 
     //output P3 250 250 255 as the header
     outFile << "P3\n"
@@ -18,7 +16,7 @@ int main() {
             uint red = 255 * x / width;
             uint green = 127;
             uint blue = 255 * y / width;
-            outFile<<red<<" "<<green<<" "<<blue<<endl;
+            outFile<<red<<" "<<green<<" "<<blue<<std::endl;
         }
     }
     outFile.close();

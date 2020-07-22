@@ -3,8 +3,6 @@
 
 #include "Renderer.h"
 
-using namespace std;
-
 bool validArgs(uint& w, uint& h, uint& splitCount,
                const char*& fileName, int argc, char* argv[]);
 
@@ -50,21 +48,21 @@ bool validArgs(uint& w, uint& h, uint& splitCount,
                const char*& fileName, int argc, char* argv[]) {
     switch (argc) {
         case 4:
-            w = stoi(argv[1]);
-            h = stoi(argv[2]);
+            w = std::stoi(argv[1]);
+            h = std::stoi(argv[2]);
             splitCount = 0;
             fileName = argv[3];
             return true;
         case 5:
-            w = stoi(argv[1]);
-            h = stoi(argv[2]);
-            splitCount = stoi(argv[3]);
+            w = std::stoi(argv[1]);
+            h = std::stoi(argv[2]);
+            splitCount = std::stoi(argv[3]);
             fileName = argv[4];
             return true;
         default:
-            cout << "Invalid arguments" << endl;
-            cout << "Expected: <width> <height> <fileName> OR " << endl;
-            cout << "          <width> <height> <splitCount> <fileName>" << endl;
+            std::cout << "Invalid arguments" << std::endl;
+            std::cout << "Expected: <width> <height> <fileName> OR " << std::endl;
+            std::cout << "          <width> <height> <splitCount> <fileName>" << std::endl;
             return false;
     }
 }

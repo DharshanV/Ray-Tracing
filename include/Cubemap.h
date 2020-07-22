@@ -5,7 +5,6 @@
 #include <fstream>
 #include "Vector3.h"
 
-using namespace std;
 typedef Vector3<float> vec3f;
 
 struct CubemapData {
@@ -16,7 +15,7 @@ struct CubemapData {
 class Cubemap {
    public:
     Cubemap();
-    Cubemap(const vector<const char*>& faces);
+    Cubemap(const std::vector<const char*>& faces);
 
     vec3f getBackground(const vec3f& direction);
 
@@ -26,6 +25,6 @@ class Cubemap {
     uint index(uint i, uint j,int width);
 
    private:
-    vector<CubemapData> cubemaps;
+    std::vector<CubemapData> cubemaps;
 };
 #endif

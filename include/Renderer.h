@@ -14,8 +14,6 @@
 #include "Objects/Sphere.h"
 #include "Objects/Object.h"
 
-using namespace std;
-
 #define PI 3.14159f
 #define RENDER_DISTANCE 10000
 #define BUFFER_MAX 100
@@ -34,7 +32,7 @@ class Renderer {
      */
     Renderer(uint width, uint height, vec3f background = vec3f(0.384f, 0.333f, 0.333f));
 
-    Renderer(uint width, uint height, vector<const char*> faces);
+    Renderer(uint width, uint height, std::vector<const char*> faces);
 
     /**
      * Add's object to a list for ray intersection.
@@ -127,13 +125,13 @@ class Renderer {
     uint FOV = 90;
     bool useCubemap;
     uint totalSample = 3;
-    vector<float> jitterValues{0.25f, 0.75f, -0.75f, 0.33f,0.45f};
+    std::vector<float> jitterValues{0.25f, 0.75f, -0.75f, 0.33f,0.45f};
     vec3f cameraOrigin;
     vec3f background;
 
-    vector<vec3f> buffer;
-    list<Object*> objects;
-    list<Light*> lights;
+    std::vector<vec3f> buffer;
+    std::list<Object*> objects;
+    std::list<Light*> lights;
     Cubemap cubemap;
 };
 

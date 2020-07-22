@@ -5,7 +5,7 @@
 
 Cubemap::Cubemap() {}
 
-Cubemap::Cubemap(const vector<const char*>& faces) {
+Cubemap::Cubemap(const std::vector<const char*>& faces) {
     if (faces.size() != 6) return;
     int width, height, nChannels;
     for (const char* pathi : faces) {

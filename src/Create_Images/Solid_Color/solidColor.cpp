@@ -1,13 +1,11 @@
 #include <fstream>
 #include <iostream>
 
-using namespace std;
-
 int main() {
     uint width = 500;
     uint height = 500;
     const char* fileName = "solidColorImage.ppm";
-    ofstream outFile(fileName);         //opens the file to write
+    std::ofstream outFile(fileName);         //opens the file to write
 
     //output P3 250 250 255 as the header
     outFile << "P3\n"
@@ -15,7 +13,7 @@ int main() {
     for (uint y = 0; y < height; y++) {
         for (uint x = 0; x < width; x++) {
             //output single solid red color
-            outFile <<"255 0 0"<<endl;
+            outFile <<"255 0 0"<<std::endl;
         }
     }
     outFile.close();

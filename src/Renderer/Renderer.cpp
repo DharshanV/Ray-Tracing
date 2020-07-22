@@ -10,7 +10,7 @@ Renderer::Renderer(uint width, uint height, vec3f background) {
     this->background = background;
 }
 
-Renderer::Renderer(uint width, uint height, vector<const char*> faces) {
+Renderer::Renderer(uint width, uint height, std::vector<const char*> faces) {
     this->width = width;
     this->height = height;
     this->FOV = FOV;
@@ -41,7 +41,7 @@ void Renderer::renderMultithreaded(uint splitCount) {
         return;
     }
     uint threadCount = 1 << (2*splitCount);
-    thread threads[threadCount];
+    std::thread threads[threadCount];
     uint threadI = 0;
 
     uint deltaThread = 1 << splitCount;
@@ -55,7 +55,7 @@ void Renderer::renderMultithreaded(uint splitCount) {
             uint bottomX = topX + deltaX;
             uint bottomY = topY + deltaY;
             threads[threadI] =
-                thread(renderThread, this, topX, topY, bottomX, bottomY);
+                std::thread(renderThread, this, topX, topY, bottomX, bottomY);
             threadI++;
         }
     }
@@ -142,11 +142,11 @@ bool Renderer::inShadow(Light* l, vec3f& rayHit, vec3f hitN, vec3f& dirToLight) 
 }
 
 void Renderer::output(const char* fileName) {
-    ofstream out(fileName, std::ofstream::binary);
+    std::ofstream out(fileName, std::ofstream::binary);
     out << "P6\n"
         << width << " " << height << " 255\n";
 
-    vector<u_char> outputBuffer;
+    std::vector<u_char> outputBuffer;
     outputBuffer.reserve(BUFFER_MAX * 3);
 
     for (uint y = 0; y < height; y++) {
@@ -183,11 +183,11 @@ vec3f Renderer::getOriginShift(const vec3f& origin, const vec3f& dir, const vec3
 }
 
 float Renderer::clip(float n, float lower, float upper) {
-    return max(lower, min(n, upper));
+    return std::max(lower, std::min(n, upper));
 }
 
 float Renderer::getDiffuse(Light* l, vec3f& N, vec3f& light) {
-    return l->getIntensity() * max(0.0f, N.dot(light));
+    return l->getIntensity() * std::max(0.0f, N.dot(light));
 }
 
 vec3f Renderer::reflect(const vec3f& A, const vec3f& B) {
@@ -195,7 +195,7 @@ vec3f Renderer::reflect(const vec3f& A, const vec3f& B) {
 }
 
 float Renderer::getSpecular(Light* l, const vec3f& R, const vec3f& E, const Material& mat) {
-    return l->getIntensity() * powf(max(0.0f, R.dot(E)), mat.specular());
+    return l->getIntensity() * powf(std::max(0.0f, R.dot(E)), mat.specular());
 }
 
 Renderer::~Renderer() {
