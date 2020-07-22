@@ -4,6 +4,10 @@ pipeline {
     stage('Build') {
       steps {
         echo 'Build started'
+        sh '''mkdir build
+cd build
+cmake ..
+make'''
       }
     }
 
