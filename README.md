@@ -9,17 +9,22 @@ compile the program and create a exectuable "renderMain".
 
 Without using the tasks.json. We can compile using g++.
 
-In the root folder, type the command:
+In the root folder, type the commands:
+```console
+mkdir build
+cd build
+cmake ..
+make
+```
 
-g++ -g -pthread ./\*.cpp ./Utility/\*.cpp -o renderMain
-
-This will also create a exectuable "renderMain".
+This will also create a exectuable "render" inside the build folder.
 
 To run the exectuable, expected arugments are:
+```console
+./build/render width height fileName OR
 
-./renderMain \<width\> \<height\> \<fileName\> OR
-
-./renderMain \<width\> \<height\> \<splitCount\> \<fileName\>
+./build/render width height splitCount fileName
+```
 
 ## What I learned
 - Ray Intersections with sphere and plane. 
