@@ -39,8 +39,7 @@ cd ..'''
     stage('Clean Up') {
       steps {
         echo 'Cleaning up'
-        sh '''echo "testing fail clean up"
-dhusa'''
+        sh 'rm renderedImage.ppm'
       }
     }
 
