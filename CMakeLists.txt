@@ -18,3 +18,4 @@ add_subdirectory(test)
 file(GLOB SOURCES src/Cubemap/*.cpp src/Renderer/*.cpp render.cpp)
 add_executable(render ${SOURCES})
 target_link_libraries (render ${CMAKE_THREAD_LIBS_INIT})
+
