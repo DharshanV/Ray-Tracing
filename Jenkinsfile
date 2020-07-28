@@ -30,6 +30,7 @@ cd ..'''
         stage('Unit Test') {
           steps {
             echo 'Unit Testing'
+            sh './build/test/test_Vector3 '
           }
         }
 
