@@ -6,8 +6,9 @@ Renderer::Renderer(uint width, uint height, vec3f background) {
     this->FOV = FOV;
     this->cameraOrigin = vec3f(0);
     this->buffer.resize(width * height);
-    this->useCubemap = false;
+    
     this->background = background;
+    this->useCubemap = false;
 }
 
 Renderer::Renderer(uint width, uint height, std::vector<const char*> faces) {
@@ -16,6 +17,7 @@ Renderer::Renderer(uint width, uint height, std::vector<const char*> faces) {
     this->FOV = FOV;
     this->cameraOrigin = vec3f(0);
     this->buffer.resize(width * height);
+
     cubemap = Cubemap(faces);
     this->useCubemap = true;
 }
@@ -24,6 +26,7 @@ void Renderer::render() {
     for (uint y = 0; y < height; y++) {
         for (uint x = 0; x < width; x++) {
             uint bufferIndex = index(x, y);
+            //Sample multiple and different ray's to get the average color
             for (uint sample = 0; sample < totalSample; sample++) {
                 float deltaX = jitterValues[sample];
                 float deltaY = jitterValues[sample + 1];
@@ -40,16 +43,20 @@ void Renderer::renderMultithreaded(uint splitCount) {
         render();
         return;
     }
+    //Figure out how many threads is needed based on splitcount
     uint threadCount = 1 << (2*splitCount);
     std::thread threads[threadCount];
     uint threadI = 0;
 
+    //Figure out equal spacing of each split so that a single
+    //thread can work on that spacing only
     uint deltaThread = 1 << splitCount;
     float deltaX = width / float(deltaThread);
     float deltaY = height / float(deltaThread);
 
     for (uint y = 0; y < deltaThread; y++) {
         for (uint x = 0; x < deltaThread; x++) {
+            //Calculate the bounds of the smaller screen
             uint topX = (uint)deltaX * x;
             uint topY = (uint)deltaY * y;
             uint bottomX = topX + deltaX;
@@ -68,6 +75,8 @@ void Renderer::renderMultithreaded(uint splitCount) {
 vec3f Renderer::castRay(const vec3f& rayOrigin, const vec3f& rayDir, uint depth) {
     vec3f hitPoint, N, dir(rayDir);
     Material hitMaterial;
+
+    //Base case for recursion. Either max depth or no intersection 
     if (depth > MAX_DEPTH ||
         !sceneIntersect(rayOrigin, rayDir, hitPoint, N, hitMaterial)) {
         return useCubemap ? cubemap.getBackground(rayDir) : background;
@@ -100,7 +109,7 @@ bool Renderer::sceneIntersect(const vec3f& rayOrigin, const vec3f& rayDir,
                               vec3f& hitPoint, vec3f& N, Material& hitMaterial) {
     float maxDistance = __FLT_MAX__;
     for (const Object* o : objects) {
-        float t;
+        float t;                            //Indicates how far from the origin to the hit point
         if (o->rayIntersect(rayOrigin, rayDir, t) && t < maxDistance) {
             maxDistance = t;
             hitPoint = rayOrigin + rayDir * t;
@@ -119,7 +128,7 @@ vec3f Renderer::getRay(float x, float y) {
     float xPrime = (2.0f * (x / width) - 1) * aspectRatio *
                    tan((FOV / 2.0f) * (PI / 180.0f));
     float yPrime = (1 - 2.0f * (y / height) *
-                            tan((FOV / 2.0f) * (PI / 180.0f)));
+                    tan((FOV / 2.0f) * (PI / 180.0f)));
 
     //get ray direction towards negative z-axis
     rayDirection = vec3f(xPrime, yPrime, -1) - cameraOrigin;
@@ -146,6 +155,8 @@ void Renderer::output(const char* fileName) {
     out << "P6\n"
         << width << " " << height << " 255\n";
 
+    //To save space, create a temp buffer, store the relevant color 
+    //values and then write each buffer one at a time.
     std::vector<u_char> outputBuffer;
     outputBuffer.reserve(BUFFER_MAX * 3);
 
@@ -157,6 +168,7 @@ void Renderer::output(const char* fileName) {
                 u_char pixelValue = (u_char)clipped;
                 outputBuffer.push_back(pixelValue);
             }
+            //Flush to file and clear the buffer
             if (outputBuffer.size() == outputBuffer.capacity()) {
                 out.write((char*)&outputBuffer[0], outputBuffer.size());
                 outputBuffer.clear();
