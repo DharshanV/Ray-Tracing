@@ -11,13 +11,8 @@ Renderer::Renderer(uint width, uint height, vec3f background) {
     this->useCubemap = false;
 }
 
-Renderer::Renderer(uint width, uint height, std::vector<const char*> faces) {
-    this->width = width;
-    this->height = height;
-    this->FOV = FOV;
-    this->cameraOrigin = vec3f(0);
-    this->buffer.resize(width * height);
-
+Renderer::Renderer(uint width, uint height, std::vector<const char*> faces) 
+    : Renderer::Renderer(width,height) {
     cubemap = Cubemap(faces);
     this->useCubemap = true;
 }
