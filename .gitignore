@@ -67,3 +67,5 @@ relative/path/to/dir/filename.extension
 relative/path/to/dir/anotherfile
 
 *.ppm
+
+!Dockerfile
