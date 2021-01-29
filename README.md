@@ -1,7 +1,7 @@
 # Ray Tracing
 A simple Ray Tracer with basic geometry, lighting, reflection, cubemap, and supersampling. 
 
-I also wrote a book, that covers building a ray tracer from scratch. I walk through step by step on what all the code means and how they work. The book can be found be found above, or the link [here](https://drive.google.com/file/d/1Gst_P7AaeW43OLikB3RMqsf97JPNXFzq/view).
+I also wrote a book, that covers building a ray tracer from scratch. I walk through step by step on what all the code means and how they work. The book can be found be found above, or the link [here](https://drive.google.com/file/d/1JcucvPDD_8kt-_4pIDhV0JOykiAHIVy2/view).
 
 ## How to run
 The project comes with a tasks.json. So pressing Ctrl + Shift + b, should
